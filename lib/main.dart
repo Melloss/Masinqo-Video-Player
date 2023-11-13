@@ -32,6 +32,10 @@ class MainApp extends StatelessWidget with ColorPallet {
         elevation: 0,
         toolbarHeight: 0,
       ),
+      sliderTheme: SliderThemeData(
+          tickMarkShape: SliderTickMarkShape.noTickMark,
+          thumbShape: SliderComponentShape.noThumb,
+          trackHeight: 3),
       textTheme: TextTheme(
         displayLarge: const TextStyle(
           fontFamily: 'RobotoCondensed',

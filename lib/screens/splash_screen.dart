@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart'
     show SpinKitThreeBounce, SpinKitWaveType;
 import 'package:get/get.dart';
@@ -43,7 +44,10 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   void initState() {
+    SystemChrome.setPreferredOrientations(
+        [DeviceOrientation.landscapeLeft, DeviceOrientation.portraitUp]);
     initializeEveryData();
+
     super.initState();
   }
 
