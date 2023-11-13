@@ -17,8 +17,8 @@ class _MasinqoLoadingAnimationState extends State<MasinqoLoadingAnimation>
 
   @override
   void initState() {
-    masinqoController =
-        AnimationController(vsync: this, duration: const Duration(seconds: 2));
+    masinqoController = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 1500));
     masinqoAnimation = Tween(begin: 10.0, end: 40.0).animate(
       CurvedAnimation(parent: masinqoController, curve: Curves.linear),
     );
@@ -62,7 +62,7 @@ class _MasinqoLoadingAnimationState extends State<MasinqoLoadingAnimation>
               },
               child: Transform.rotate(
                 angle: -math.pi * 0.25,
-                child: Image.asset('assets/masinqo_ejeta_2.png'),
+                child: Image.asset('assets/masinqo_ejeta.png'),
               ),
             ),
           ],

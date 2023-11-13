@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart'
-    show SpinKitWave, SpinKitWaveType;
+    show SpinKitThreeBounce, SpinKitWaveType;
 import 'package:get/get.dart';
+import '../screens/video_list_screen.dart';
 import '../controllers/data_controller.dart';
 import '../utilities/media_query.dart';
 import '../widgets/masinqo_loading_animation.dart';
@@ -16,11 +17,24 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> {
   DataController dataController = Get.find();
   bool showTryAgainButton = false;
+  bool isLoading = false;
 
-  initalizeEveryData() async {
-    bool isFetchingCompleted = await dataController.isFetchingCompleted();
-    Future.delayed(const Duration(seconds: 2));
+  initializeEveryData() async {
+    setState(() {
+      isLoading = true;
+    });
+    bool isFetchingCompleted = await dataController.isFetchingSuccessful();
+    await Future.delayed(const Duration(seconds: 3));
+    setState(() {
+      isLoading = false;
+    });
     if (isFetchingCompleted) {
+      setState(() {
+        showTryAgainButton = false;
+      });
+      Get.off(() => const VideoListScreen(),
+          transition: Transition.fadeIn, duration: const Duration(seconds: 2));
+    } else {
       setState(() {
         showTryAgainButton = true;
       });
@@ -29,12 +43,14 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   void initState() {
+    initializeEveryData();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.center,
@@ -46,7 +62,7 @@ class _SplashScreenState extends State<SplashScreen> {
             child: Column(
               children: [
                 Text(
-                  'Mesenqo',
+                  'Masinqo',
                   style: Theme.of(context).textTheme.displayLarge,
                 ),
                 const SizedBox(height: 10),
@@ -57,21 +73,35 @@ class _SplashScreenState extends State<SplashScreen> {
               ],
             ),
           ),
-          showTryAgainButton
-              ? TextButton(
-                  onPressed: () {
-                    setState(() {
-                      showTryAgainButton = false;
-                    });
-                  },
-                  child: Text('Try Again'))
-              : const SpinKitWave(
-                  type: SpinKitWaveType.center,
-                  color: Color(0xFF3498db),
-                  size: 25,
-                  itemCount: 10,
-                  duration: Duration(seconds: 2),
-                ),
+          SizedBox(
+            height: 100,
+            child: showTryAgainButton
+                ? TextButton(
+                    onPressed: () async {
+                      setState(() {
+                        showTryAgainButton = false;
+                      });
+                      await initializeEveryData();
+                    },
+                    child: Column(
+                      children: [
+                        Text(
+                          'Try Again',
+                          style: Theme.of(context).textTheme.displayMedium,
+                        ),
+                        const SizedBox(height: 10),
+                        const Icon(Icons.refresh)
+                      ],
+                    ))
+                : Visibility(
+                    visible: isLoading,
+                    child: const SpinKitThreeBounce(
+                      color: Color(0xFF3498db),
+                      size: 17,
+                      duration: Duration(seconds: 2),
+                    ),
+                  ),
+          )
         ],
       ),
     );
