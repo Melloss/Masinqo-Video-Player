@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart'
-    show SpinKitThreeBounce, SpinKitWaveType;
+import 'package:flutter_spinkit/flutter_spinkit.dart' show SpinKitThreeBounce;
 import 'package:get/get.dart';
+
 import '../screens/video_list_screen.dart';
+import '../controllers/ad_controller.dart';
 import '../controllers/data_controller.dart';
 import '../utilities/media_query.dart';
 import '../widgets/masinqo_loading_animation.dart';
@@ -17,6 +18,7 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   DataController dataController = Get.find();
+  AdController adController = Get.find();
   bool showTryAgainButton = false;
   bool isLoading = false;
 
@@ -40,12 +42,13 @@ class _SplashScreenState extends State<SplashScreen> {
         showTryAgainButton = true;
       });
     }
+    // it addes ad for later use
+    adController.loadAd();
   }
 
   @override
   void initState() {
-    SystemChrome.setPreferredOrientations(
-        [DeviceOrientation.landscapeLeft, DeviceOrientation.portraitUp]);
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     initializeEveryData();
 
     super.initState();

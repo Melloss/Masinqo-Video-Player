@@ -1,16 +1,17 @@
 import 'dart:convert' show jsonDecode, jsonEncode;
 
-import 'package:flutter/material.dart' show Color;
+import 'package:flutter/material.dart' show Color, Colors;
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import '../utilities/snack_bar.dart';
 import '../models/video_model.dart';
 
 class DataController extends GetxController {
   List<Video> videoList = [];
-  Color? backgroundColor;
+  Color backgroundColor = Colors.blue;
 
   // this method initialize all Video object
   _initVideos(List videos) {

@@ -9,10 +9,12 @@ import 'package:get/get.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:in_app_review/in_app_review.dart';
-import 'video_play_screen.dart';
+
+import '../controllers/ad_controller.dart';
 import '../utilities/color_pallet.dart';
 import '../utilities/media_query.dart';
 import '../controllers/data_controller.dart';
+import '../utilities/snack_bar.dart';
 
 class VideoListScreen extends StatefulWidget {
   const VideoListScreen({super.key});
@@ -23,19 +25,26 @@ class VideoListScreen extends StatefulWidget {
 
 class _VideoListScreenState extends State<VideoListScreen> with ColorPallet {
   DataController dataController = Get.find();
+  AdController adController = Get.find();
   late StreamSubscription<ConnectivityResult> subscription;
   late ConnectivityResult _connectivityResult;
+  int selectedIndex = -1;
+
   @override
   void initState() {
     _connectivityResult = ConnectivityResult.none;
     subscription = Connectivity()
         .onConnectivityChanged
         .listen((ConnectivityResult result) {
-      setState(() {
-        _connectivityResult = result;
-      });
+      setState(
+        () {
+          _connectivityResult = result;
+        },
+      );
       // Lock the orientation to portrait when the screen is created
       SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+      // this loads ad
+      adController.loadAd();
     });
     super.initState();
   }
@@ -51,26 +60,37 @@ class _VideoListScreenState extends State<VideoListScreen> with ColorPallet {
     return Scaffold(
       backgroundColor: dataController.backgroundColor,
       appBar: AppBar(
-        toolbarHeight: 30,
+        toolbarHeight: 40,
         backgroundColor: dataController.backgroundColor,
         systemOverlayStyle: SystemUiOverlayStyle(
           statusBarColor: dataController.backgroundColor,
           statusBarIconBrightness: Brightness.light,
         ),
         actions: [
-          IconButton(
+          Padding(
+            padding: const EdgeInsets.only(top: 7, right: 7),
+            child: IconButton(
+                onPressed: () async {
+                  Share.share('Share this app');
+                },
+                icon: const Icon(Icons.share)),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 7, right: 10),
+            child: IconButton(
               onPressed: () async {
-                Share.share('Share this app');
-              },
-              icon: const Icon(Icons.share)),
-          IconButton(
-              onPressed: () async {
-                final InAppReview inAppReview = InAppReview.instance;
-                if (await inAppReview.isAvailable()) {
-                  await inAppReview.requestReview();
+                try {
+                  final InAppReview inAppReview = InAppReview.instance;
+                  if (await inAppReview.isAvailable()) {
+                    await inAppReview.requestReview();
+                  }
+                } catch (error) {
+                  //(error.toString());
                 }
               },
-              icon: const Icon(Icons.rate_review)),
+              icon: const Icon(Icons.rate_review),
+            ),
+          ),
         ],
       ),
       body: Column(
@@ -110,7 +130,7 @@ class _VideoListScreenState extends State<VideoListScreen> with ColorPallet {
                             .displayLarge!
                             .copyWith(
                                 color: splashBackgroundColor,
-                                fontWeight: FontWeight.w300),
+                                fontWeight: FontWeight.w400),
                       ),
                       const SizedBox(width: 5),
                       Align(
@@ -138,9 +158,15 @@ class _VideoListScreenState extends State<VideoListScreen> with ColorPallet {
 
   _buildVideoTile(int index) {
     return InkWell(
-      splashColor: Colors.red,
       onTap: () {
-        Get.to(() => VideoPlayScreen(index: index));
+        // here it checks the internet connectivity and loads the ad
+        if (_connectivityResult == ConnectivityResult.mobile) {
+          adController.selectedIndex = index;
+          adController.interstitialAd?.show();
+        } else {
+          showSnackbar('No Internet Connection',
+              'Pls Connect to Internet, and Try Again!');
+        }
       },
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
@@ -173,15 +199,14 @@ class _VideoListScreenState extends State<VideoListScreen> with ColorPallet {
                 child: FutureBuilder<ConnectivityResult>(
                     future: Connectivity().checkConnectivity(),
                     builder: (context, snapshot) {
-                      if (_connectivityResult == ConnectivityResult.mobile ||
-                          _connectivityResult == ConnectivityResult.wifi ||
-                          _connectivityResult == ConnectivityResult.ethernet) {
+                      try {
                         return CachedNetworkImage(
                           imageUrl: dataController.videoList[index].thumbnail,
                           fit: BoxFit.fill,
                         );
+                      } catch (error) {
+                        return Container();
                       }
-                      return Container();
                     }),
               ),
               Positioned(
@@ -221,9 +246,16 @@ class _VideoListScreenState extends State<VideoListScreen> with ColorPallet {
   _buildVideoList() {
     return Container(
       width: screenWidth(context),
-      height: screenHeight(context) * 0.72,
+      height: screenHeight(context) * 0.75,
       padding: const EdgeInsets.only(top: 50),
       decoration: BoxDecoration(
+        boxShadow: [
+          BoxShadow(
+            blurRadius: 5,
+            color: Colors.grey.withOpacity(0.2),
+            spreadRadius: 5,
+          )
+        ],
         color: splashBackgroundColor,
         borderRadius: const BorderRadius.only(topRight: Radius.circular(80)),
       ),

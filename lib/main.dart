@@ -1,12 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+
 import '../utilities/color_pallet.dart';
 import '../screens/splash_screen.dart';
 import './controllers/init_controllers.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // it initialize the ad
+  MobileAds.instance.initialize();
+
+  // this initialize my controllers
   await initControllers();
+
   runApp(MainApp());
 }
 
